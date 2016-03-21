@@ -36,16 +36,30 @@ public abstract class GolemMultiTextured extends GolemBase
 	{
 		super.entityInit();
 		this.getDataWatcher().addObject(DATA_WATCHER_TEXTURE, new Byte((byte)0));
+	}
+	
+	@Override
+	protected void applyTexture()
+	{
 		this.setTextureType(this.getGolemTexture("clay"));
 	}
 	
 	@Override
 	public boolean interact(EntityPlayer player)
 	{
-		this.setTextureNum((byte)((this.getTextureNum() + 1) % this.textures.length));
-		this.setTextureType(this.getSpecialGolemTexture());
-		this.writeEntityToNBT(new NBTTagCompound());
-		return true;
+		// only change texture when player has empty hand
+		if(player.getHeldItem() != null)
+		{
+			return super.interact(player);
+		}
+		else
+		{
+			this.setTextureNum((byte)((this.getTextureNum() + 1) % this.textures.length));
+			this.setTextureType(this.getSpecialGolemTexture());
+			this.writeEntityToNBT(new NBTTagCompound());
+			player.swingItem();
+			return true;
+		}
 	}
 	
 	@Override
@@ -56,8 +70,6 @@ public abstract class GolemMultiTextured extends GolemBase
 		if(this.ticksExisted == 2)
 		{
 			this.setTextureType(this.getSpecialGolemTexture());
-			// debug:
-			//System.out.println("Set texture using textureNum = " + this.getTextureNum());
 		}
 	}
 	
@@ -74,8 +86,6 @@ public abstract class GolemMultiTextured extends GolemBase
 		super.readEntityFromNBT(nbt);
 		this.setTextureNum(nbt.getByte(NBT_TEXTURE));
 		this.setTextureType(this.getSpecialGolemTexture());
-		// debug:
-		//System.out.println("NBT textureNum = " + this.getTextureNum());
 	}
 	
 	@Override
@@ -84,6 +94,12 @@ public abstract class GolemMultiTextured extends GolemBase
 		this.setTextureNum((byte)this.rand.nextInt(this.textures.length));
 		this.setTextureType(this.getSpecialGolemTexture());
 		return super.onSpawnWithEgg(data);
+	}
+	
+	@Override
+	public boolean doesInteractChangeTexture()
+	{
+		return true;
 	}
 	
 	/** Call getGolemTexture with specialized name concatenation **/

@@ -1,11 +1,14 @@
 package com.golems.entity;
 
+import java.util.List;
+
 import com.golems.main.Config;
+import com.golems.main.ContentInit;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -14,30 +17,95 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.EnderTeleportEvent;
 
 public class EntityEndstoneGolem extends GolemBase 
 {			
-	private int teleportDelay;
-
+	/** countdown timer for next teleport **/
+	protected int teleportDelay;
+	/** Max distance for one teleport; range is 32.0 for endstone golem **/
+	protected double range;
+	protected boolean canTeleport;
+	protected boolean hasParticles;
+	
+	protected int ticksBetweenIdleTeleports;
+	/** Percent chance to teleport away when hurt by non-projectile **/
+	protected int chanceToTeleportWhenHurt;
+	
+	/** Default constructor **/
 	public EntityEndstoneGolem(World world) 
 	{
-		super(world, 8.0F, Blocks.end_stone);
+		this(world, 8.0F, Blocks.end_stone, 32.0D, Config.ALLOW_ENDSTONE_SPECIAL, true);
+	}
+	
+	/**
+	 * Flexible constructor to allow child classes to customize.
+	 * 
+	 * @param world the worldObj
+	 * @param attack base attack damage
+	 * @param pick Creative pick-block return
+	 * @param teleportRange 64.0 for enderman, 32.0 for endstone golem
+	 * @param teleportingAllowed usually set by the config, checked here
+	 * @param particles whether to display "portal" particles 
+	 **/
+	public EntityEndstoneGolem(World world, float attack, Block pick, double teleportRange, boolean teleportingAllowed, boolean particles)
+	{
+		super(world, attack, pick);
+		this.ticksBetweenIdleTeleports = 200;
+		this.chanceToTeleportWhenHurt = 15;
+		this.range = teleportRange;
+		this.canTeleport = teleportingAllowed;
+		this.hasParticles = particles;
+	}
+
+	/**
+	 * Flexible contructor to allow child classes to customize.
+	 * 
+	 * @param world the worldObj
+	 * @param attack base attack damage
+	 * @param teleportRange 64.0 for enderman, 32.0 for endstone golem
+	 * @param teleportingAllowed usually set by the config, checked here
+	 * @param particles whether to display "portal" particles 
+	 **/
+	public EntityEndstoneGolem(World world, float attack, double teleportRange, boolean teleportingAllowed, boolean particles) 
+	{
+		this(world, attack, ContentInit.golemHead, teleportRange, teleportingAllowed, particles);
+	}
+	
+	@Override
+	protected void applyTexture()
+	{
+		this.setTextureType(this.getGolemTexture("end_stone"));
+	}
+	
+	@Override
+	protected void applyAttributes() 
+	{
+		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(50.0D);
+		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.26D);
 	}
 
 	@Override
-	protected void entityInit()
+	public void addGolemDrops(List<WeightedRandomChestContent> dropList, boolean recentlyHit, int lootingLevel)
 	{
-		super.entityInit();
-		this.setTextureType(this.getGolemTexture("end_stone"));
+		GolemBase.addDropEntry(dropList, Blocks.end_stone, 0, 2, 2 + lootingLevel, 90);
+		GolemBase.addDropEntry(dropList, Items.ender_pearl, 0, 2, 4 + lootingLevel, 40);
+		GolemBase.addDropEntry(dropList, Items.ender_eye, 0, 1, 1 + lootingLevel, 6);
 	}
 
-	private boolean teleportTo(double p_70825_1_, double p_70825_3_, double p_70825_5_)
+	@Override
+	public String getGolemSound() 
 	{
-		EnderTeleportEvent event = new EnderTeleportEvent(this, p_70825_1_, p_70825_3_, p_70825_5_, 0);
-		if(MinecraftForge.EVENT_BUS.post(event) || !Config.ALLOW_ENDSTONE_SPECIAL)
+		return Block.soundTypeStone.soundName;
+	}
+
+	protected boolean teleportTo(double x, double y, double z)
+	{
+		EnderTeleportEvent event = new EnderTeleportEvent(this, x, y, z, 0);
+		if(MinecraftForge.EVENT_BUS.post(event) || !canTeleport)
 		{
 			return false;
 		}
@@ -91,7 +159,7 @@ public class EntityEndstoneGolem extends GolemBase
 		{
 			short short1 = 128;
 
-			for (int l = 0; l < short1; ++l)
+			for (int l = 0; this.hasParticles && l < short1; ++l)
 			{
 				double d6 = (double)l / ((double)short1 - 1.0D);
 				float f = (this.rand.nextFloat() - 0.5F) * 0.2F;
@@ -103,7 +171,7 @@ public class EntityEndstoneGolem extends GolemBase
 				this.worldObj.spawnParticle("portal", d7, d8, d9, (double)f, (double)f1, (double)f2);
 			}
 
-			if(Config.ALLOW_ENDSTONE_SPECIAL)
+			if(canTeleport)
 			{
 				this.worldObj.playSoundEffect(d3, d4, d5, "mob.endermen.portal", 1.0F, 1.0F);
 				this.playSound("mob.endermen.portal", 1.0F, 1.0F);
@@ -113,11 +181,11 @@ public class EntityEndstoneGolem extends GolemBase
 		}
 	}
 
-	private boolean teleportRandomly()
+	protected boolean teleportRandomly()
 	{
-		double d0 = this.posX + (this.rand.nextDouble() - 0.5D) * 32.0D; //was * 64.0D but Endstone golems should have smaller range
-		double d1 = this.posY + (double)(this.rand.nextInt(64) - 32);
-		double d2 = this.posZ + (this.rand.nextDouble() - 0.5D) * 32.0D;
+		double d0 = this.posX + (this.rand.nextDouble() - 0.5D) * range;
+		double d1 = this.posY + (this.rand.nextDouble() - 0.5D) * range * 0.5D;
+		double d2 = this.posZ + (this.rand.nextDouble() - 0.5D) * range;
 		return this.teleportTo(d0, d1, d2);
 	}
 
@@ -125,11 +193,9 @@ public class EntityEndstoneGolem extends GolemBase
 	public void onLivingUpdate()
 	{
 		super.onLivingUpdate();
-		int i;
-		int j;
-		int k;
+		int i, j, k;
 
-		for (k = 0; k < 2; ++k)
+		for (k = 0; this.hasParticles && k < 2; ++k)
 		{
 			this.worldObj.spawnParticle("portal", this.posX + (this.rand.nextDouble() - 0.5D) * (double)this.width, this.posY + this.rand.nextDouble() * (double)this.height - 0.25D, this.posZ + (this.rand.nextDouble() - 0.5D) * (double)this.width, (this.rand.nextDouble() - 0.5D) * 2.0D, -this.rand.nextDouble(), (this.rand.nextDouble() - 0.5D) * 2.0D);
 		}
@@ -142,7 +208,7 @@ public class EntityEndstoneGolem extends GolemBase
 				this.teleportToEntity(this.entityToAttack);
 			}
 		}
-		else if(rand.nextInt(200) == 0)
+		else if(rand.nextInt(ticksBetweenIdleTeleports) == 0)
 		{
 			this.teleportRandomly();
 		}
@@ -151,7 +217,7 @@ public class EntityEndstoneGolem extends GolemBase
 		{
 			if (this.entityToAttack != null)
 			{
-				if (this.entityToAttack instanceof EntityMob)
+				if (this.entityToAttack instanceof IMob)
 				{
 					if (this.entityToAttack.getDistanceSqToEntity(this) < 16.0D)
 					{
@@ -181,7 +247,7 @@ public class EntityEndstoneGolem extends GolemBase
 		}
 		else
 		{
-
+			// if it's a projectile, try to teleport away
 			if (source instanceof EntityDamageSourceIndirect)
 			{
 				for (int i = 0; i < 32; ++i)
@@ -196,7 +262,7 @@ public class EntityEndstoneGolem extends GolemBase
 			}
 			else
 			{
-				if(rand.nextInt(8) == 0 || (this.entityToAttack != null && rand.nextInt(2) == 0))
+				if(rand.nextInt(100) < this.chanceToTeleportWhenHurt || (this.entityToAttack != null && rand.nextBoolean()))
 				{
 					this.teleportRandomly();
 				}
@@ -206,10 +272,7 @@ public class EntityEndstoneGolem extends GolemBase
 		}
 	}
 
-	/**
-	 * Teleport the enderman to another entity
-	 */
-	private boolean teleportToEntity(Entity entity)
+	protected boolean teleportToEntity(Entity entity)
 	{
 		Vec3 vec3 = Vec3.createVectorHelper(this.posX - entity.posX, this.boundingBox.minY + (double)(this.height / 2.0F) - entity.posY + (double)entity.getEyeHeight(), this.posZ - entity.posZ);
 		vec3 = vec3.normalize();
@@ -218,35 +281,5 @@ public class EntityEndstoneGolem extends GolemBase
 		double d2 = this.posY + (double)(this.rand.nextInt(16) - 8) - vec3.yCoord * d0;
 		double d3 = this.posZ + (this.rand.nextDouble() - 0.5D) * 8.0D - vec3.zCoord * d0;
 		return this.teleportTo(d1, d2, d3);
-	}
-
-	//THE FOLLOWING USE @Override AND SHOULD BE SET FOR EACH GOLEM
-
-	@Override
-	protected void applyEntityAttributes() 
-	{
-		super.applyEntityAttributes();
-		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(50.0D);
-		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.26D);
-	}
-
-	@Override
-	public ItemStack getGolemDrops() 
-	{
-		int i = rand.nextInt(3);
-		switch(i)
-		{
-		case 0:	return new ItemStack(Item.getItemFromBlock(Blocks.end_stone), 2 + this.rand.nextInt(2));
-		case 1:	return new ItemStack(Items.ender_pearl, 2 + this.rand.nextInt(3));
-		case 2:	return new ItemStack(Items.ender_eye, 1 + this.rand.nextInt(2));
-		}
-
-		return new ItemStack(Item.getItemFromBlock(Blocks.end_stone));
-	}
-
-	@Override
-	public String getGolemSound() 
-	{
-		return Block.soundTypeStone.soundName;
 	}
 }

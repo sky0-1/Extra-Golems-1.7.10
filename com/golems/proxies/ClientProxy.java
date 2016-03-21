@@ -18,14 +18,18 @@ import com.golems.entity.EntityMelonGolem;
 import com.golems.entity.EntityNetherBrickGolem;
 import com.golems.entity.EntityObsidianGolem;
 import com.golems.entity.EntityQuartzGolem;
+import com.golems.entity.EntityRedstoneGolem;
 import com.golems.entity.EntitySandstoneGolem;
 import com.golems.entity.EntitySpongeGolem;
+import com.golems.entity.EntityStainedClayGolem;
+import com.golems.entity.EntityStainedGlassGolem;
 import com.golems.entity.EntityStrawGolem;
 import com.golems.entity.EntityTNTGolem;
 import com.golems.entity.EntityWoodenGolem;
 import com.golems.entity.EntityWoolGolem;
 import com.golems.entity.GolemBase;
 import com.golems.events.GolemClientEventHandler;
+import com.golems.renders.RenderColoredGolem;
 import com.golems.renders.RenderGolem;
 
 import cpw.mods.fml.client.registry.RenderingRegistry;
@@ -49,13 +53,16 @@ public class ClientProxy extends CommonProxy
 		register(EntityHardenedClayGolem.class);
 		register(EntityIceGolem.class);
 		register(EntityLapisGolem.class);
-		register(EntityLeafGolem.class);
+		registerColorized(EntityLeafGolem.class);
 		register(EntityMelonGolem.class);
 		register(EntityNetherBrickGolem.class);
 		register(EntityObsidianGolem.class);
 		register(EntityQuartzGolem.class);
+		register(EntityRedstoneGolem.class);
 		register(EntitySandstoneGolem.class);
 		register(EntitySpongeGolem.class);
+		registerColorized(EntityStainedClayGolem.class);
+		registerColorized(EntityStainedGlassGolem.class);
 		register(EntityStrawGolem.class);
 		register(EntityTNTGolem.class);
 		register(EntityWoodenGolem.class);
@@ -73,5 +80,10 @@ public class ClientProxy extends CommonProxy
 	public static void register(Class<? extends GolemBase> golem)
 	{
 		RenderingRegistry.registerEntityRenderingHandler(golem, new RenderGolem());
+	}
+	
+	public static void registerColorized(Class<? extends GolemBase> golem)
+	{
+		RenderingRegistry.registerEntityRenderingHandler(golem, new RenderColoredGolem());
 	}
 }

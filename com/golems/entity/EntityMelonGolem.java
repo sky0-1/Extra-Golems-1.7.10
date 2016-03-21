@@ -1,5 +1,7 @@
 package com.golems.entity;
 
+import java.util.List;
+
 import com.golems.main.Config;
 
 import net.minecraft.block.Block;
@@ -11,6 +13,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 
 public class EntityMelonGolem extends GolemBase 
@@ -20,9 +23,8 @@ public class EntityMelonGolem extends GolemBase
 		super(world, 1.5F, Blocks.melon_block);
 	}
 
-	protected void entityInit()
+	protected void applyTexture()
 	{
-		super.entityInit();
 		this.setTextureType(this.getGolemTexture("melon"));
 	}
 
@@ -52,7 +54,7 @@ public class EntityMelonGolem extends GolemBase
 		}
 	}
 
-	private void setToPlant(World world, int x, int y, int z)
+	protected void setToPlant(World world, int x, int y, int z)
 	{
 		int ranInt = rand.nextInt(5);
 		Block b = null;
@@ -83,21 +85,20 @@ public class EntityMelonGolem extends GolemBase
 		}
 	}
 
-	//THE FOLLOWING SHOULD BE SET FOR EACH GOLEM
-
 	@Override
-	protected void applyEntityAttributes() 
+	protected void applyAttributes() 
 	{
-		super.applyEntityAttributes();
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(18.0D);
 		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.26D);
 	}
 
 	@Override
-	public ItemStack getGolemDrops() 
+	public void addGolemDrops(List<WeightedRandomChestContent> dropList, boolean recentlyHit, int lootingLevel)
 	{
-		int size = 6 + this.rand.nextInt(4);
-		return new ItemStack(Items.melon, size);
+		int size = 6 + this.rand.nextInt(6 + lootingLevel * 4);
+		GolemBase.addGuaranteedDropEntry(dropList, new ItemStack(Items.melon, size));
+		GolemBase.addDropEntry(dropList, Items.melon_seeds, 0, 1, 6 + lootingLevel, 20 + lootingLevel * 10);
+		GolemBase.addDropEntry(dropList, Items.speckled_melon, 0, 1, 1, 2 + lootingLevel * 10);
 	}
 
 	@Override

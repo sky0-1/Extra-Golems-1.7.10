@@ -1,16 +1,17 @@
 package com.golems.entity;
 
+import java.util.List;
+
 import com.golems.main.Config;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 
 public class EntityBookshelfGolem extends GolemBase 
@@ -23,9 +24,8 @@ public class EntityBookshelfGolem extends GolemBase
 	}
 	
 	@Override
-	protected void entityInit()
+	protected void applyTexture()
 	{
-		super.entityInit();
 		this.setTextureType(this.getGolemTexture("books"));
 	}
 
@@ -45,21 +45,18 @@ public class EntityBookshelfGolem extends GolemBase
 		}
 	}
 
-	//THE FOLLOWING USE @Override AND SHOULD BE SET FOR EACH GOLEM
-
 	@Override
-	protected void applyEntityAttributes() 
+	protected void applyAttributes() 
 	{
-		super.applyEntityAttributes();
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(28.0D);
 		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.29D);
 	}
 
 	@Override
-	public ItemStack getGolemDrops() 
+	public void addGolemDrops(List<WeightedRandomChestContent> dropList, boolean recentlyHit, int lootingLevel)
 	{
-		int size = 4 + this.rand.nextInt(6);
-		return new ItemStack(Items.book, size);
+		int size = 4 + this.rand.nextInt(6 + lootingLevel);
+		GolemBase.addGuaranteedDropEntry(dropList, new ItemStack(Items.book, size));
 	}
 
 	@Override

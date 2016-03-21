@@ -1,8 +1,10 @@
 package com.golems.renders;
 
+import java.awt.Color;
+
 import org.lwjgl.opengl.GL11;
 
-import com.golems.entity.GolemBase;
+import com.golems.entity.GolemColorized;
 
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.entity.Entity;
@@ -11,14 +13,16 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
 
 /**
- * RenderGolem is the same as RenderIronGolem but with casting to GolemBase instead of EntityIronGolem
+ * RenderGolem is the same as RenderIronGolem but with casting to GolemColorized instead of EntityIronGolem
  */
-public class RenderGolem extends RenderLiving 
+public class RenderColoredGolem extends RenderLiving 
 {
 	/** Golem's Model. */
     private final ModelGolem golemModel;
     
-    public RenderGolem()
+    private ResourceLocation texture;
+    
+    public RenderColoredGolem()
     {
         super(new ModelGolem(), 0.5F);
         this.golemModel = (ModelGolem)this.mainModel;
@@ -30,12 +34,64 @@ public class RenderGolem extends RenderLiving
      * (Render<T extends Entity) and this method has signature public void func_76986_a(T entity, double d, double d1,
      * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.
      */
-    public void doRender(GolemBase golem, double x, double y, double z, float f0, float f1)
+    public void doRender(GolemColorized golem, double x, double y, double z, float f0, float f1)
     {
-        super.doRender((EntityLiving)golem, x, y, z, f0, f1);
+    	long color = golem.getColor();
+    	if((color & -67108864) == 0) 
+    	{
+    	    color |= -16777216;
+    	}
+
+    	float colorRed = (float) (color >> 16 & 255) / 255.0F;
+    	float colorGreen = (float) (color >> 8 & 255) / 255.0F;
+    	float colorBlue = (float) (color & 255) / 255.0F;
+    	float colorAlpha = (float) (color >> 24 & 255) / 255.0F;
+    	
+    	GL11.glPushMatrix();
+    	// enable transparency if needed
+    	   	
+    	// debug:
+    	//if(golem.ticksExisted % 20 == 0) System.out.print("golem.getColor() returns " + golem.getColor() + "; colorRed=" + colorRed + "; colorGreen=" + colorGreen + "; colorBlue=" + colorBlue + "\n");
+    	
+    	// render first pass of golem texture (usually eyes and other opaque, pre-colored features)
+    	if(golem.hasBase())
+    	{
+	    	this.texture = golem.getTextureBase();
+	    	if(this.texture != null)
+	    	{
+	    		super.doRender((EntityLiving)golem, x, y, z, f0, f1);
+	    	}
+    	}
+
+    	// prepare to render the complicated layer
+    	GL11.glColor4f(colorRed, colorGreen, colorBlue, colorAlpha);
+    	if(golem.hasTransparency())
+    	{
+    		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+    		GL11.glEnable(GL11.GL_NORMALIZE);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+    	}
+    		
+    	// render second pass of golem texture, enabling colorizing and transparency if specified
+    	this.texture = golem.getTextureToColor();
+    	if(this.texture != null)
+    	{
+    		super.doRender((EntityLiving)golem, x, y, z, f0, f1);
+    	}
+        
+    	// return GL11 settings to normal
+    	if(golem.hasTransparency())
+    	{
+    		GL11.glPopAttrib();
+    		GL11.glDisable(GL11.GL_NORMALIZE);
+            GL11.glDisable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+    	}
+        GL11.glPopMatrix();      
     }
 
-    protected void rotateCorpse(GolemBase p_77043_1_, float p_77043_2_, float p_77043_3_, float p_77043_4_)
+    protected void rotateCorpse(GolemColorized p_77043_1_, float p_77043_2_, float p_77043_3_, float p_77043_4_)
     {
         super.rotateCorpse(p_77043_1_, p_77043_2_, p_77043_3_, p_77043_4_);
 
@@ -48,7 +104,7 @@ public class RenderGolem extends RenderLiving
         }
     }
 
-    protected void renderEquippedItems(GolemBase p_77029_1_, float p_77029_2_)
+    protected void renderEquippedItems(GolemColorized p_77029_1_, float p_77029_2_)
     {
         super.renderEquippedItems(p_77029_1_, p_77029_2_);
     }
@@ -61,17 +117,17 @@ public class RenderGolem extends RenderLiving
      */
     public void doRender(EntityLiving p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_)
     {
-        this.doRender((GolemBase)p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
+        this.doRender((GolemColorized)p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
     }
 
     protected void renderEquippedItems(EntityLivingBase p_77029_1_, float p_77029_2_)
     {
-        this.renderEquippedItems((GolemBase)p_77029_1_, p_77029_2_);
+        this.renderEquippedItems((GolemColorized)p_77029_1_, p_77029_2_);
     }
 
     protected void rotateCorpse(EntityLivingBase p_77043_1_, float p_77043_2_, float p_77043_3_, float p_77043_4_)
     {
-        this.rotateCorpse((GolemBase)p_77043_1_, p_77043_2_, p_77043_3_, p_77043_4_);
+        this.rotateCorpse((GolemColorized)p_77043_1_, p_77043_2_, p_77043_3_, p_77043_4_);
     }
 
     /**
@@ -82,7 +138,7 @@ public class RenderGolem extends RenderLiving
      */
     public void doRender(EntityLivingBase p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_)
     {
-        this.doRender((GolemBase)p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
+        this.doRender((GolemColorized)p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
     }
 
     /**
@@ -90,8 +146,8 @@ public class RenderGolem extends RenderLiving
      */
     protected ResourceLocation getEntityTexture(Entity entity)
     {
-    	GolemBase thisentity = (GolemBase) entity;
-        return thisentity.getTextureType();
+    	GolemColorized thisentity = (GolemColorized) entity;
+        return this.texture != null ? this.texture : thisentity.getTextureBase();
     }
 
     /**
@@ -102,6 +158,6 @@ public class RenderGolem extends RenderLiving
      */
     public void doRender(Entity p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_)
     {
-        this.doRender((GolemBase)p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
+        this.doRender((GolemColorized)p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
     }
 }

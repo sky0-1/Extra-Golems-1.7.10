@@ -1,5 +1,7 @@
 package com.golems.entity;
 
+import java.util.List;
+
 import com.golems.main.Config;
 
 import net.minecraft.block.Block;
@@ -11,6 +13,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 
 public class EntityCoalGolem extends GolemBase
@@ -21,18 +24,14 @@ public class EntityCoalGolem extends GolemBase
 	}
 	
 	@Override
-	protected void entityInit()
+	protected void applyTexture()
 	{
-		super.entityInit();
 		this.setTextureType(this.getGolemTexture("coal"));
 	}
 
-	//THE FOLLOWING USE @Override AND SHOULD BE SET FOR EACH GOLEM
-
 	@Override
-	protected void applyEntityAttributes() 
+	protected void applyAttributes() 
 	{
-		super.applyEntityAttributes();
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(14.0D);
 		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.28D);
 	}
@@ -54,10 +53,11 @@ public class EntityCoalGolem extends GolemBase
 	}
 
 	@Override
-	public ItemStack getGolemDrops() 
+	public void addGolemDrops(List<WeightedRandomChestContent> dropList, boolean recentlyHit, int lootingLevel)
 	{
-		int size = 8 + this.rand.nextInt(8);
-		return new ItemStack(Items.coal, size);
+		int size = 8 + this.rand.nextInt(8 + lootingLevel * 2);
+		GolemBase.addGuaranteedDropEntry(dropList, new ItemStack(Items.coal, size));
+		GolemBase.addDropEntry(dropList, Items.coal, 1, 1, size / 4, 40);
 	}
 
 	@Override

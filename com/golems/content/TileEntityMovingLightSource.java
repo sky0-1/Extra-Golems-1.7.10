@@ -16,20 +16,10 @@ public class TileEntityMovingLightSource extends TileEntity
     @Override
     public void updateEntity()
     {
-    	List entityList = worldObj.getEntitiesWithinAABB(GolemBase.class, this.getAABBToCheck(this.xCoord, this.yCoord, this.zCoord));
-    	boolean foundGolem = false;
-    	// check each entity in the list looking for a glowable golem
-        for (int i = 0, j = entityList.size(); i < j; ++i)
-        {
-            Entity entity1 = (Entity)entityList.get(i);
-            if (entity1 instanceof GolemLightProvider)
-            {
-                foundGolem = true;
-				break;
-            }
-        }
+    	List entityList = worldObj.getEntitiesWithinAABB(GolemLightProvider.class, this.getAABBToCheck(this.xCoord, this.yCoord, this.zCoord));
+  
         // if no golem was found, delete this tile entity and its block
-    	if(!foundGolem)
+    	if(entityList.isEmpty())
         {
             if(worldObj.getBlock(this.xCoord, this.yCoord, this.zCoord) instanceof BlockLightProvider)
             {

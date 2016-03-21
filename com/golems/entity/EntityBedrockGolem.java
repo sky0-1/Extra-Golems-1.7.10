@@ -1,36 +1,31 @@
 package com.golems.entity;
 
-import com.golems.main.Config;
+import java.util.List;
+
 import com.golems.main.ContentInit;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.monster.EntitySkeleton;
-import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 
 public class EntityBedrockGolem extends GolemBase 
 {			
 	public EntityBedrockGolem(World world) 
 	{
-		super(world, 14.0F, Blocks.bedrock);
+		super(world, 32.0F, Blocks.bedrock);
 	}
 
-	protected void entityInit()
+	@Override
+	protected void applyTexture()
 	{
-		super.entityInit();
 		this.setTextureType(this.getGolemTexture("bedrock"));
 	}
 
@@ -70,28 +65,22 @@ public class EntityBedrockGolem extends GolemBase
 			}
 		}
 
-		return true;
+		return super.interact(player);
 	}
 
 	@Override
 	protected void damageEntity(DamageSource source, float amount) { }
 
-	//THE FOLLOWING USE @Override AND SHOULD BE SET FOR EACH GOLEM
-
 	@Override
-	protected void applyEntityAttributes() 
+	protected void applyAttributes() 
 	{
-		super.applyEntityAttributes();
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(999.0D);
 		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.24D);
 		this.getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setBaseValue(1.0D);
 	}
 
 	@Override
-	public ItemStack getGolemDrops() 
-	{
-		return new ItemStack(Item.getItemFromBlock(Blocks.air), 1);
-	}
+	public void addGolemDrops(List<WeightedRandomChestContent> dropList, boolean recentlyHit, int lootingLevel) {}
 
 	@Override
 	public String getGolemSound() 

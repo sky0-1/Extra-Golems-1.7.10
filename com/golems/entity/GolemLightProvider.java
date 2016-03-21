@@ -83,21 +83,24 @@ public abstract class GolemLightProvider extends GolemBase
 	/** Allows the golem to emit different levels of light **/
 	public static enum EnumLightLevel
 	{
-		HALF(ContentInit.blockLightProviderHalf, 0.5F),
-		FULL(ContentInit.blockLightProviderFull, 1.0F);
+		HALF(0.5F),
+		FULL(1.0F);
 		
-		private final Block toPlace;
 		private final float light;
 		
-		private EnumLightLevel(Block place, float brightness)
+		private EnumLightLevel(float brightness)
 		{
-			this.toPlace = place;
 			this.light = brightness;
 		}
 		
 		public Block getLightBlock()
 		{
-			return this.toPlace;
+			switch(this)
+			{
+			case FULL:	return ContentInit.blockLightProviderFull;
+			case HALF:	return ContentInit.blockLightProviderHalf;
+			default:	return Blocks.air;
+			}
 		}
 		
 		public float getBrightness()

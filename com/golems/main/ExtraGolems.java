@@ -21,7 +21,7 @@ public class ExtraGolems
 {
 	public static final String MODID = "golems";
 	public static final String NAME = "Extra Golems";
-	public static final String VERSION = "1.19";
+	public static final String VERSION = "1.20";
 	public static final String MCVERSION = "1.7.10";
 	public static final String CLIENT = "com." + MODID + ".proxies.ClientProxy";
 	public static final String SERVER = "com." + MODID + ".proxies.CommonProxy";

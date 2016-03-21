@@ -1,5 +1,7 @@
 package com.golems.entity;
 
+import java.util.List;
+
 import com.golems.main.Config;
 
 import net.minecraft.block.Block;
@@ -12,6 +14,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 
 public class EntityNetherBrickGolem extends GolemBase 
@@ -28,9 +31,8 @@ public class EntityNetherBrickGolem extends GolemBase
 		this.tasks.addTask(0, new EntityAISwimming(this));
 	}
 
-	protected void entityInit()
+	protected void applyTexture()
 	{
-		super.entityInit();
 		this.setTextureType(this.getGolemTexture("nether_brick"));
 	}
 
@@ -82,21 +84,18 @@ public class EntityNetherBrickGolem extends GolemBase
 		}
 	}
 
-	//THE FOLLOWING USE @Override AND SHOULD BE SET FOR EACH GOLEM
-
 	@Override
-	protected void applyEntityAttributes() 
+	protected void applyAttributes() 
 	{
-		super.applyEntityAttributes();
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(25.0D);
 		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.28D);
 	}
 
 	@Override
-	public ItemStack getGolemDrops() 
+	public void addGolemDrops(List<WeightedRandomChestContent> dropList, boolean recentlyHit, int lootingLevel)
 	{
-		int size = 4 + this.rand.nextInt(8);
-		return new ItemStack(Items.netherbrick, size);
+		int size = 4 + this.rand.nextInt(8 + lootingLevel);
+		GolemBase.addGuaranteedDropEntry(dropList, new ItemStack(Items.netherbrick, size));
 	}
 
 	@Override

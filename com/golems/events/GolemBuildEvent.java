@@ -77,7 +77,7 @@ public class GolemBuildEvent extends Event
 	}
 	
 	/** @return true if all 4 construction blocks have the same metadata **/
-	public boolean areGolemBlocksSameMeta() 
+	protected boolean areGolemBlocksSameMeta() 
 	{
 		int x = this.headX;
 		int y = this.headY;

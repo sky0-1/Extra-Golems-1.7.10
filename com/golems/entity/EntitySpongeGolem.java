@@ -1,5 +1,7 @@
 package com.golems.entity;
 
+import java.util.List;
+
 import com.golems.main.Config;
 
 import net.minecraft.block.Block;
@@ -9,6 +11,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 
 public class EntitySpongeGolem extends GolemBase 
@@ -19,9 +22,8 @@ public class EntitySpongeGolem extends GolemBase
 		this.getNavigator().setAvoidsWater(false);
 	}
 
-	protected void entityInit()
+	protected void applyTexture()
 	{
-		super.entityInit();
 		this.setTextureType(this.getGolemTexture("sponge"));
 	}
 
@@ -33,28 +35,28 @@ public class EntitySpongeGolem extends GolemBase
 	public void onLivingUpdate()
 	{
 		super.onLivingUpdate();
-		if(Config.ALLOW_SPONGE_SPECIAL && this.ticksExisted % 4 == 0)
+		if(Config.ALLOW_SPONGE_SPECIAL && (Config.TWEAK_SPONGE_INTERVAL == 1 || this.ticksExisted % Config.TWEAK_SPONGE_INTERVAL == 0))
 		{
 			int x = MathHelper.floor_double(this.posX);
 			int y = MathHelper.floor_double(this.posY - 0.20000000298023224D);
 			int z = MathHelper.floor_double(this.posZ);
-			int[][] blockCoords = 
-				{{x,y,z},{x+1,y,z},{x-1,y,z},{x,y,z+1},{x,y,z-1},
-				{x+1,y,z+1},{x-1,y,z+1},{x+1,y,z-1},{x-1,y,z-1}};
-
-			// affect 3 layers of blocks around the golem
-			for(int i = -1; i < 3; i++)
+			
+			// affect sphere around the golem
+			for(int i = -Config.TWEAK_SPONGE; i <= Config.TWEAK_SPONGE; i++)
 			{
-				for(int[] coord : blockCoords)
+				for(int j = -Config.TWEAK_SPONGE; j <= Config.TWEAK_SPONGE; j++)
 				{
-					int xCoord = coord[0];
-					int yCoord = coord[1] + i;
-					int zCoord = coord[2];
-					Block b1 = this.worldObj.getBlock(xCoord, yCoord, zCoord);
-
-					if(b1 == Blocks.water || b1 == Blocks.flowing_water || b1.getMaterial() == Material.water)
+					for(int k = -Config.TWEAK_SPONGE; k <= Config.TWEAK_SPONGE; k++)
 					{
-						this.worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+						if(this.getDistance(x + i, y + j, z + k) <= Config.TWEAK_SPONGE)
+						{
+							Block b1 = this.worldObj.getBlock(x + i, y + j, z + k);
+
+							if(b1 == Blocks.water || b1 == Blocks.flowing_water || b1.getMaterial() == Material.water)
+							{
+								this.worldObj.setBlockToAir(x + i, y + j, z + k);
+							}
+						}
 					}
 				}	
 			}
@@ -69,21 +71,18 @@ public class EntitySpongeGolem extends GolemBase
 		}
 	}
 
-	//THE FOLLOWING USE @Override AND SHOULD BE SET FOR EACH GOLEM
-
 	@Override
-	protected void applyEntityAttributes() 
+	protected void applyAttributes() 
 	{
-		super.applyEntityAttributes();
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(20.0D);
 		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.22D);
 	}
 
 	@Override
-	public ItemStack getGolemDrops() 
+	public void addGolemDrops(List<WeightedRandomChestContent> dropList, boolean recentlyHit, int lootingLevel)	
 	{
-		int size = 1 + this.rand.nextInt(3);
-		return new ItemStack(Item.getItemFromBlock(Blocks.sponge), size);
+		int size = 1 + this.rand.nextInt(3 + lootingLevel);
+		GolemBase.addGuaranteedDropEntry(dropList, new ItemStack(Item.getItemFromBlock(Blocks.sponge), size > 4 ? 4 : size));
 	}
 
 	@Override

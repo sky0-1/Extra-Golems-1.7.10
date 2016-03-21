@@ -1,5 +1,7 @@
 package com.golems.entity;
 
+import java.util.List;
+
 import com.golems.main.Config;
 
 import net.minecraft.block.Block;
@@ -10,6 +12,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 
 public class EntityIceGolem extends GolemBase 
@@ -20,9 +23,9 @@ public class EntityIceGolem extends GolemBase
 		this.getNavigator().setAvoidsWater(false);
 	}
 
-	protected void entityInit()
+	@Override
+	protected void applyTexture()
 	{
-		super.entityInit();
 		this.setTextureType(this.getGolemTexture("ice"));
 	}
 
@@ -106,21 +109,22 @@ public class EntityIceGolem extends GolemBase
 		return false;  
 	}
 
-	//THE FOLLOWING USE @Override AND SHOULD BE SET FOR EACH GOLEM
-
 	@Override
-	protected void applyEntityAttributes() 
+	protected void applyAttributes() 
 	{
-		super.applyEntityAttributes();
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(18.0D);
 		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.26D);
 	}
 
 	@Override
-	public ItemStack getGolemDrops() 
+	public void addGolemDrops(List<WeightedRandomChestContent> dropList, boolean recentlyHit, int lootingLevel)
 	{
-		int size = 1 + this.rand.nextInt(3);
-		return new ItemStack(Item.getItemFromBlock(Blocks.packed_ice), size);
+		int size = 1 + lootingLevel;
+		GolemBase.addGuaranteedDropEntry(dropList, new ItemStack(Blocks.ice, size > 4 ? 4 : size));
+		if(lootingLevel > 0 || !Config.CAN_USE_REGULAR_ICE)
+		{
+			GolemBase.addDropEntry(dropList, Blocks.packed_ice, 0, 0, size > 2 ? 2 : size, 80);
+		}
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package com.golems.entity;
 
+import java.util.List;
+
 import com.golems.main.Config;
 
 import net.minecraft.block.Block;
@@ -13,6 +15,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 
 public class EntityLapisGolem extends GolemBase 
@@ -24,9 +27,8 @@ public class EntityLapisGolem extends GolemBase
 		super(world, 1.5F, Blocks.lapis_block);
 	}
 
-	protected void entityInit()
+	protected void applyTexture()
 	{
-		super.entityInit();
 		this.setTextureType(this.getGolemTexture("lapis"));
 	}
 
@@ -46,21 +48,19 @@ public class EntityLapisGolem extends GolemBase
 		return false;
 	}
 
-	//THE FOLLOWING USE @Override AND SHOULD BE SET FOR EACH GOLEM
-
 	@Override
-	protected void applyEntityAttributes() 
+	protected void applyAttributes() 
 	{
-		super.applyEntityAttributes();
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(50.0D);
 		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.28D);
 	}
 
 	@Override
-	public ItemStack getGolemDrops() 
+	public void addGolemDrops(List<WeightedRandomChestContent> dropList, boolean recentlyHit, int lootingLevel)
 	{
-		int size = 8 + this.rand.nextInt(8);
-		return new ItemStack(Items.dye, size, 4);
+		int size = 8 + this.rand.nextInt(10) + lootingLevel * 4;
+		GolemBase.addGuaranteedDropEntry(dropList, new ItemStack(Items.dye, size, 4));
+		GolemBase.addDropEntry(dropList, Items.gold_ingot, 0, 1, 1 + lootingLevel, 8 + lootingLevel * 30);
 	}
 
 	@Override

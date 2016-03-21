@@ -17,20 +17,20 @@ import com.golems.entity.EntityMelonGolem;
 import com.golems.entity.EntityNetherBrickGolem;
 import com.golems.entity.EntityObsidianGolem;
 import com.golems.entity.EntityQuartzGolem;
+import com.golems.entity.EntityRedstoneGolem;
 import com.golems.entity.EntitySandstoneGolem;
 import com.golems.entity.EntitySpongeGolem;
+import com.golems.entity.EntityStainedClayGolem;
+import com.golems.entity.EntityStainedGlassGolem;
 import com.golems.entity.EntityStrawGolem;
 import com.golems.entity.EntityTNTGolem;
 import com.golems.entity.EntityWoodenGolem;
 import com.golems.entity.EntityWoolGolem;
-import com.golems.entity.GolemBase;
 import com.golems.main.Config;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.init.Blocks;
-import net.minecraft.world.World;
 
 /** Handles events added specifically from this mod **/
 public class GolemEventHandler 
@@ -89,7 +89,7 @@ public class GolemEventHandler
 			{
 				event.setGolem(new EntityGlassGolem(event.worldObj), Config.ALLOW_GLASS_GOLEM);
 			}
-			else if(event.blockBelow == Blocks.packed_ice)
+			else if(event.blockBelow == Blocks.packed_ice || (Config.CAN_USE_REGULAR_ICE && event.blockBelow == Blocks.ice))
 			{
 				event.setGolem(new EntityIceGolem(event.worldObj), Config.ALLOW_ICE_GOLEM);
 			}
@@ -128,6 +128,18 @@ public class GolemEventHandler
 			else if(event.blockBelow == Blocks.melon_block)
 			{
 				event.setGolem(new EntityMelonGolem(event.worldObj), Config.ALLOW_MELON_GOLEM);
+			}
+			else if(event.blockBelow == Blocks.stained_glass)
+			{
+				event.setGolem(new EntityStainedGlassGolem(event.worldObj), Config.ALLOW_STAINED_GLASS_GOLEM);
+			}
+			else if(event.blockBelow == Blocks.stained_hardened_clay)
+			{
+				event.setGolem(new EntityStainedClayGolem(event.worldObj), Config.ALLOW_STAINED_CLAY_GOLEM);
+			}
+			else if(event.blockBelow == Blocks.redstone_block)
+			{
+				event.setGolem(new EntityRedstoneGolem(event.worldObj), Config.ALLOW_REDSTONE_GOLEM);
 			}
 			else if(event.blockBelow instanceof BlockLeaves)
 			{

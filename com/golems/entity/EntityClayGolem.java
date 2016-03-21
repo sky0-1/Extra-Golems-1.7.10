@@ -1,10 +1,13 @@
 package com.golems.entity;
 
+import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 
 public class EntityClayGolem extends GolemBase 
@@ -15,27 +18,23 @@ public class EntityClayGolem extends GolemBase
 	}
 	
 	@Override
-	protected void entityInit()
+	protected void applyTexture()
 	{
-		super.entityInit();
 		this.setTextureType(this.getGolemTexture("clay"));
 	}
 
-	//THE FOLLOWING USE @Override AND SHOULD BE SET FOR EACH GOLEM
-
 	@Override
-	protected void applyEntityAttributes() 
+	protected void applyAttributes() 
 	{
-		super.applyEntityAttributes();
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(20.0D);
 		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.22D);
 	}
 
 	@Override
-	public ItemStack getGolemDrops() 
+	public void addGolemDrops(List<WeightedRandomChestContent> dropList, boolean recentlyHit, int lootingLevel)
 	{
-		int size = 8 + this.rand.nextInt(8);
-		return new ItemStack(Items.clay_ball, size);
+		int size = 8 + this.rand.nextInt(8 + lootingLevel);
+		GolemBase.addGuaranteedDropEntry(dropList, new ItemStack(Items.clay_ball, size));
 	}
 
 	@Override

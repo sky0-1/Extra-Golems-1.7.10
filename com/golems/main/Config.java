@@ -23,7 +23,10 @@ public class Config
 	public static boolean ALLOW_NETHERBRICK_GOLEM;
 	public static boolean ALLOW_OBSIDIAN_GOLEM;
 	public static boolean ALLOW_QUARTZ_GOLEM;
+	public static boolean ALLOW_REDSTONE_GOLEM;
 	public static boolean ALLOW_SANDSTONE_GOLEM;
+	public static boolean ALLOW_STAINED_CLAY_GOLEM;
+	public static boolean ALLOW_STAINED_GLASS_GOLEM;
 	public static boolean ALLOW_SPONGE_GOLEM;
 	public static boolean ALLOW_STRAW_GOLEM;
 	public static boolean ALLOW_TNT_GOLEM;
@@ -39,12 +42,20 @@ public class Config
 	public static boolean ALLOW_MELON_SPECIAL;
 	public static boolean ALLOW_NETHERBRICK_SPECIAL_FIRE;
 	public static boolean ALLOW_NETHERBRICK_SPECIAL_LAVA;
+	public static boolean ALLOW_REDSTONE_SPECIAL;
 	public static boolean ALLOW_SPONGE_SPECIAL;
 	public static boolean ALLOW_TNT_SPECIAL;
 	
+	public static boolean CAN_USE_REGULAR_ICE;
+	
 	public static int TWEAK_NETHERBRICK;
 	public static int TWEAK_MELON;
-	
+	public static int TWEAK_REDSTONE;
+	public static int TWEAK_SPONGE_INTERVAL;
+	public static int TWEAK_SPONGE;
+	public static int TWEAK_STAINED_GLASS;
+	public static int TWEAK_STAINED_CLAY;
+
 	private static final String CATEGORY_SPAWNS = "spawns";
 	private static final String CATEGORY_ABILITY = "abilities";
 	private static final String CATEGORY_TWEAKS = "tweaks";
@@ -89,8 +100,14 @@ public class Config
 				"Whether the Obsidian Golem can be built.");
 		ALLOW_QUARTZ_GOLEM = config.getBoolean("Allow Quartz Golem", CATEGORY_SPAWNS, true,
 				"Whether the Quartz Golem can be built.");
+		ALLOW_REDSTONE_GOLEM = config.getBoolean("Allow Redstone Golem", CATEGORY_SPAWNS, true,
+				"Whether the Redstone Golem can be built.");
 		ALLOW_SANDSTONE_GOLEM = config.getBoolean("Allow Sandstone Golem", CATEGORY_SPAWNS, true,
 				"Whether the Sandstone Golem can be built.");
+		ALLOW_STAINED_CLAY_GOLEM = config.getBoolean("Allow Stained Clay Golem", CATEGORY_SPAWNS, true,
+				"Whether the Stained Clay Golem can be built.");
+		ALLOW_STAINED_GLASS_GOLEM = config.getBoolean("Allow Stained Glass Golem", CATEGORY_SPAWNS, true,
+				"Whether the Stained Glass Golem can be built.");
 		ALLOW_SPONGE_GOLEM = config.getBoolean("Allow Sponge Golem", CATEGORY_SPAWNS, true,
 				"Whether the Sponge Golem can be built.");
 		ALLOW_STRAW_GOLEM = config.getBoolean("Allow Straw Golem", CATEGORY_SPAWNS, true,
@@ -101,6 +118,8 @@ public class Config
 				"Whether the Wooden Golem can be built.");
 		ALLOW_WOOL_GOLEM = config.getBoolean("Allow Wool Golem", CATEGORY_SPAWNS, true,
 				"Whether the Wool Golem can be built.");
+		CAN_USE_REGULAR_ICE = config.getBoolean("Can use regular Ice", CATEGORY_SPAWNS, true,
+				"When true, the Ice Golem can be built with regular ice as well as packed ice");
 		
 		/////////////////////////////////////////////////////////////////////////////////////
 		
@@ -122,10 +141,12 @@ public class Config
 				"Whether the NetherBrick Golem can light enemies on fire");
 		ALLOW_NETHERBRICK_SPECIAL_LAVA = config.getBoolean("Allow NetherBrick Golem Lava Special", CATEGORY_ABILITY, true, 
 				"Whether the NetherBrick Golem can melt cobblestone when in place for too long");
+		ALLOW_REDSTONE_SPECIAL = config.getBoolean("Allow Redstone Golem Special", CATEGORY_ABILITY, true, 
+				"Whether the Redstone Golem can power nearby blocks");
 		ALLOW_SPONGE_SPECIAL = config.getBoolean("Allow Sponge Golem Special", CATEGORY_ABILITY, true, 
 				"Whether the Sponge Golem can soak up water nearby");
 		ALLOW_TNT_SPECIAL = config.getBoolean("Allow TNT Golem Special", CATEGORY_ABILITY, true, 
-				"Whether the TNT Golem can explode randomly or upon death");
+				"Whether the TNT Golem can explode (randomly or upon death)");
 		
 		/////////////////////////////////////////////////////////////////////////////////////
 		
@@ -133,7 +154,17 @@ public class Config
 				"Average number of ticks between uses of Melon Golem special. (16 sec * 20 t/sec = 400 t)");
 		TWEAK_NETHERBRICK = config.getInt("Netherbrick Golem Interval", CATEGORY_TWEAKS, 300, 1, 240000, 
 				"Number of ticks the NetherBrick Golem must stand on cobblestone to melt it. (15 sec * 20 t/sec = 300 t)");
-		
+		TWEAK_REDSTONE = config.getInt("Redstone Golem Power", CATEGORY_TWEAKS, 15, 1, 15, 
+				"Redstone power level emitted by Redstone Golem");
+		TWEAK_SPONGE_INTERVAL = config.getInt("Sponge Golem Interval", CATEGORY_TWEAKS, 2, 1, 24000, 
+				"Number of ticks in between water-checks. Increase to reduce lag.");
+		TWEAK_SPONGE = config.getInt("Sponge Golem Range", CATEGORY_TWEAKS, 2, 2, 8, 
+				"Radial distance at which Sponge Golem can absorb water (Warning: larger values cause lag)");
+		TWEAK_STAINED_CLAY = config.getInt("Stained Clay Golem drop metadata", CATEGORY_TWEAKS, -1, -1, 15, 
+				"The metadata of stained clay dropped by Stained Clay golems. Set to -1 to let it be based on current texture.");
+		TWEAK_STAINED_GLASS = config.getInt("Stained Glass Golem drop metadata", CATEGORY_TWEAKS, -1, -1, 15, 
+				"The metadata of stained glass dropped by Stained Glass golems. Set to -1 to let it be based on current texture.");
+
 		config.save();
 	}
 }
