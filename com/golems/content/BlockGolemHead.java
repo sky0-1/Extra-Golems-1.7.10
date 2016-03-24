@@ -79,10 +79,11 @@ public class BlockGolemHead extends BlockDirectional
 					removeGolemBlocks(world, x, y, z, false, false);
 					EntitySnowman entitysnowman = new EntitySnowman(world);
 					entitysnowman.setLocationAndAngles((double)x + 0.5D, (double)y - 1.95D, (double)z + 0.5D, 0.0F, 0.0F);
-					System.out.print("[Extra Golems]: Building regular boring Snow Golem\n");
+					System.out.print("[Extra Golems] Building regular boring Snow Golem\n");
 					world.spawnEntityInWorld(entitysnowman);
 				}
 				spawnParticles(world, x, y - 2, z);
+				return;
 			}
 
 			// hard-coded support for Iron Golem
@@ -93,12 +94,13 @@ public class BlockGolemHead extends BlockDirectional
 					removeGolemBlocks(world, x, y, z, alignedX);
 					// spawn the golem
 					EntityIronGolem golem = new EntityIronGolem(world);
-					System.out.print("[Extra Golems]: Building regular boring Iron Golem\n");
+					System.out.print("[Extra Golems] Building regular boring Iron Golem\n");
 					golem.setPlayerCreated(true);
 					golem.setLocationAndAngles((double)x + 0.5D, (double)y - 1.95D, (double)z + 0.5D, 0.0F, 0.0F);
 					world.spawnEntityInWorld(golem);
 				}
 				spawnParticles(world, x, y - 2, z);
+				return;
 			}
 
 			if(alignedX || alignedZ)
@@ -116,7 +118,7 @@ public class BlockGolemHead extends BlockDirectional
 
 					// spawn the golem
 					GolemBase golem = event.getGolem();
-					System.out.print("[Extra Golems]: Building golem " + golem.toString() + "\n");
+					System.out.print("[Extra Golems] Building golem of type " + golem.toString() + "\n");
 					golem.setPlayerCreated(true);
 					golem.setLocationAndAngles((double)x + 0.5D, (double)y - 1.95D, (double)z + 0.5D, 0.0F, 0.0F);
 					world.spawnEntityInWorld(golem);
